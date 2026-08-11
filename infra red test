@@ -1,0 +1,27 @@
+#define pinSensor1 7
+#define pinSensor2 6
+
+void setup() {
+  // put your setup code here, to run once:
+  pinMode(pinSensor1, INPUT);
+  pinMode(pinSensor2, INPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+  bool estadoSensor1 = digitalRead(pinSensor1);
+  bool estadoSensor2 = digitalRead(pinSensor2);
+
+  if (estadoSensor1 && estadoSensor2) {
+    Serial.println("PRETO E PRETO");
+  } else if (!estadoSensor1 && estadoSensor2) {
+    Serial.println("PRETO E BRANCO");
+  } else if (estadoSensor1 && !estadoSensor2) {
+    Serial.println("BRANCO E PRETO");
+  } else if (!estadoSensor1 && !estadoSensor2) {
+    Serial.println("BRANCO E BRANCO");
+  }
+
+}
