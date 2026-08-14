@@ -1,13 +1,18 @@
-#define pinSensor1 7 
-#define pinSensor2 6  
-#define ENA 5
-#define IN1 4
-#define IN2 3
+//CÓDIGO SEGUIDOR DE LINHA ATUALIZADO - 12/08/2026
+//PRINCIPAIS ALTERAÇÕES
+//*INVERSÃO DA LÓGICA - CASE 0 = ANDANDO PRA FRENTE
+//*PORTAS ATUALIZADAS
 
-#define ENB 9
-#define IN3 8
-#define IN4 10
-int velocidadeBase = 150;
+#define pinSensor1 7 
+#define pinSensor2 12  
+#define ENA 3
+#define IN1 6
+#define IN2 5
+
+#define ENB 10
+#define IN3 9
+#define IN4 8
+int velocidadeBase = 180;
 float Kp = 25;
 float Kd = 10;
 
@@ -68,8 +73,8 @@ void loop()
     int velocidadeMotorEsq = velocidadeBase + correcao;
     int velocidadeMotorDir = velocidadeBase - correcao;
 
-    velocidadeMotorEsq = constrain(velocidadeMotorEsq, 0, 180);
-    velocidadeMotorDir = constrain(velocidadeMotorDir, 0, 180);
+    velocidadeMotorEsq = constrain(velocidadeMotorEsq, 0, 255);
+    velocidadeMotorDir = constrain(velocidadeMotorDir, 0, 255);
 
     analogWrite(ENA, velocidadeMotorEsq);
     analogWrite(ENB, velocidadeMotorDir);
@@ -86,7 +91,7 @@ void loop()
       break;
 
       case 0:
-        andar(0,1,0,1);
+        andar(1,0,1,0);
       break;
       
       default:
@@ -96,8 +101,8 @@ void loop()
 }
 
 void andar(int IN1E, int IN2E, int IN1D, int IN2D) {    
-       digitalWrite(IN1, IN1E);
-       digitalWrite(IN2, IN2E);
-       digitalWrite(IN3, IN1D);
-       digitalWrite(IN4, IN2D);
+       digitalWrite(IN1, IN1D);
+       digitalWrite(IN2, IN2D);
+       digitalWrite(IN3, IN1E);
+       digitalWrite(IN4, IN2E);
 }
