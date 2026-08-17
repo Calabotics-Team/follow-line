@@ -1,0 +1,61 @@
+#define pinSensor1 3
+#define pinSensor2 4  
+
+#define ENA 5
+#define IN1 6
+#define IN2 7
+
+#define ENB 10
+#define IN3 8
+#define IN4 9
+
+int velocidadeBase = 180;
+
+void setup()
+{
+    pinMode(pinSensor1, INPUT);
+    pinMode(pinSensor2, INPUT);
+
+    pinMode(ENA, OUTPUT);
+    pinMode(IN1, OUTPUT);
+    pinMode(IN2, OUTPUT);
+
+    pinMode(ENB, OUTPUT);
+    pinMode(IN3, OUTPUT);
+    pinMode(IN4, OUTPUT);
+
+    Serial.begin(9600);
+}
+
+void loop()
+{
+    bool sensorE = digitalRead(pinSensor1);
+    bool sensorD = digitalRead(pinSensor2);
+    
+    analogWrite(ENA, 200 );
+    analogWrite(ENB, 200);
+    
+    if(sensorE == HIGH && sensorD == HIGH) {
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+    } else if(sensorE == LOW && sensorD == HIGH){
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+    }else if(sensorE == HIGH && sensorD == LOW){
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, LOW);
+    }else {
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, LOW);
+    }
+    
+    
+}
