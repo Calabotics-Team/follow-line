@@ -1,4 +1,4 @@
-# Documentação - seguidor de linha com módulo TCRT5000
+
 ## Representação
 
 O código C++ é direcionado para um seguidor de linha que possui o seguinte sensor de infravermelho:
