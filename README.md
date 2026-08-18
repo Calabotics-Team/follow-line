@@ -3,17 +3,17 @@
 
 O código C++ é direcionado para um seguidor de linha que possui o seguinte sensor de infravermelho:
 
-![Sensor infravermelho TCRT5000](imagens/Pasted image 20260818085252.png)
+![Sensor infravermelho TCRT5000](imagens/Pasted%20image%2020260818085252.png)
 
 Nome: MÓDULO TCRT5000 5 CANAIS
 
-![Módulo TCRT5000 detalhes](imagens/Pasted image 20260818085309.png)
+![Módulo TCRT5000 detalhes](imagens/Pasted%20image%2020260818085309.png)
 
 ## Junções
 
 *  Na competição, é comum de ter retas e curvas durante o percurso. Todavia, é também necessário estar preparado para outros tipos de formas na pista, representados abaixo:
   
-![Tipos de junções na pista](imagens/Pasted image 20260818090004.png)
+![Tipos de junções na pista](imagens/Pasted%20image%2020260818090004.png)
 
 * O código precisa saber o que fazer nessas situações, pessoalmente, acredito que não todas as situações descritas acimas, porém as que são mais importantes:
 
@@ -59,29 +59,29 @@ return 3; // pensar em mais lógicas possíveis (exemplo: se nenhum dos sensores
 ### T
 * Em uma situação em que o infravermelho reconhece o T com o TCRT5000, a representação é o seguinte:
 
-![Reconhecimento de T](imagens/Pasted image 20260818093020.png)
+![Reconhecimento de T](imagens/Pasted%20image%2020260818093020.png)
 
 ### U turn
 
-![Reconhecimento de U turn](imagens/Pasted image 20260818093313.png)
+![Reconhecimento de U turn](imagens/Pasted%20image%2020260818093313.png)
 
 ### Left turn
 
-![Reconhecimento de Left turn](imagens/Pasted image 20260818093545.png)
+![Reconhecimento de Left turn](imagens/Pasted%20image%2020260818093545.png)
 
 ### Right turn
 
-![Reconhecimento de Right turn](imagens/Pasted image 20260818093718.png)
+![Reconhecimento de Right turn](imagens/Pasted%20image%2020260818093718.png)
 
 ### Right T
 
-![Reconhecimento de Right T](imagens/Pasted image 20260818093932.png)
+![Reconhecimento de Right T](imagens/Pasted%20image%2020260818093932.png)
 
 *ATENÇÃO:* Note que o infravermelho TCRT5000 lê o RIGHT TURN igual ao RIGHT T.
 
 ### Left T
 
-![Reconhecimento de Left T](imagens/Pasted image 20260818094042.png)
+![Reconhecimento de Left T](imagens/Pasted%20image%2020260818094042.png)
 
 -> Por conseguinte, LEFT T também lê igualmente como LEFT TURN.
 
