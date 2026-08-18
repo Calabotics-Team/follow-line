@@ -3,17 +3,17 @@
 
 O código C++ é direcionado para um seguidor de linha que possui o seguinte sensor de infravermelho:
 
-![[Pasted image 20260818085252.png]]
+![[Pasted image imagens/20260818085252.png]]
 
 Nome: MÓDULO TCRT5000 5 CANAIS
 
-![[Pasted image 20260818085309.png]]
+![[Pasted image imagens/20260818085309.png]]
 
 ## Junções
 
 *  Na competição, é comum de ter retas e curvas durante o percurso. Todavia, é também necessário estar preparado para outros tipos de formas na pista, representados abaixo:
   
-![[Pasted image 20260818090004.png]]
+![[Pasted image imagens/20260818090004.png]]
 
 * O código precisa saber o que fazer nessas situações, pessoalmente, acredito que não todas as situações descritas acimas, porém as que são mais importantes:
 
@@ -59,28 +59,28 @@ return 3; // pensar em mais lógicas possíveis (exemplo: se nenhum dos sensores
 ### T
 * Em uma situação em que o infravermelho reconhece o T com o TCRT5000, a representação é o seguinte:
 
- ![[Pasted image 20260818093020.png]]
+ ![[Pasted image imagens/20260818093020.png]]
 ### U turn
 
-![[Pasted image 20260818093313.png]]
+![[Pasted image imagens/20260818093313.png]]
 
 ### Left turn
 
-![[Pasted image 20260818093545.png]]
+![[Pasted image imagens/20260818093545.png]]
 
 ### Right turn
 
-![[Pasted image 20260818093718.png]]
+![[Pasted image imagens/20260818093718.png]]
 
 ### Right T
 
-![[Pasted image 20260818093932.png]]
+![[Pasted image imagens/20260818093932.png]]
 
 *ATENÇÃO:* Note que o infravermelho TCRT5000 lê o RIGHT TURN igual ao RIGHT T.
 
 ### Left T
 
-![[Pasted image 20260818094042.png]]
+![[Pasted image imagens/20260818094042.png]]
 
 -> Por conseguinte, LEFT T também lê igualmente como LEFT TURN.
 
