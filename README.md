@@ -3,7 +3,7 @@
 
 O código C++ é direcionado para um seguidor de linha que possui o seguinte sensor de infravermelho:
 
-![[imagens/Pasted image 20260818085252.png]]
+![](imagens/Pasted image 20260818085252.png)
 
 Nome: MÓDULO TCRT5000 5 CANAIS
 
