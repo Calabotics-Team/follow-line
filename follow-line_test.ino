@@ -90,24 +90,20 @@ void andar(int IN1E, int IN2E, int IN1D, int IN2D)
 }
 
 // este método irá testar algumas condições de leitura, e terá retorno um número inteiro para cada situação. Reaproveitarei o switch feito por Leonardo, achei uma boa ideia
-int decisao(bool sensorAtras, bool sensorExtremaEsquerda, bool sensorMeiaEsquerda, bool sensorMeiaDireita, bool sensorExtremaDireita)
-{
+int decisao(bool sensorFrente, bool sensorExtremaEsquerda, bool sensorMeiaEsquerda, bool sensorMeiaDireita, bool sensorExtremaDireita){
   
-  if (sensorAtras && !sensorExtremaEsquerda && !sensorMeiaEsquerda && !sensorMeiaDireita && !sensorExtremaDireita) // primeira lógica: seguir para frente 
-  {
+  if (sensorFrente && !sensorExtremaEsquerda && !sensorMeiaEsquerda && !sensorMeiaDireita && !sensorExtremaDireita){ // primeira lógica: seguir para frente 
     return 0;
-  } else if (sensorExtremaEsquerda && sensorMeiaDireita && sensorAtras && !sensorMeiaDireita && !sensorExtremaDireita) // segunda lógica: ir para a esquerda
-  {
+    //nesse caso, dispondo o sensor de outra maneira seria !sensorFrente
+  } else if (sensorExtremaEsquerda && sensorMeiaEsquerda && sensorFrente && !sensorMeiaDireita && !sensorExtremaDireita){ // segunda lógica: ir para a esquerda
     return 1;
-  } else if (sensorExtremaDireita && sensorMeiaDireita && sensorAtras && !sensorMeiaEsquerda && !sensorExtremaEsquerda) // terceira lógica: ir para a direita
-  {
+    //nesse caso também, com a nova disposição do sensor seria !sensorFrente
+  } else if (sensorExtremaDireita && sensorMeiaDireita && sensorFrente && !sensorMeiaEsquerda && !sensorExtremaEsquerda){ // terceira lógica: ir para a direita
     return -1;
-  } else if (sensorAtras && sensorExtremaEsquerda && sensorMeiaEsquerda && sensorMeiaDireita && sensorExtremaDireita) // lógica quando o carrinho encontra um "T" na linha 
-  {  
-    return 2; // precisamos ver como faremos a lógica de decisão nesse sentido
-  } else 
-  {
-    return 3; // pensar em mais lógicas possíveis (exemplo: se nenhum dos sensores estiverem indentificando nada, parar)
+  } else if (sensorFrente && sensorExtremaEsquerda && sensorMeiaEsquerda && sensorMeiaDireita && sensorExtremaDireita){ // lógica quando o carrinho encontra um "T" na linha 
+    return 2;//decidir lógica
+  } else if(sensorFrente && sensorExtremaEsquerda && sensorMeiaEsquerda && sensorMeiaDireita && sensorExtremaDireita){
+    return 3; //quando houver um cruzamento
   }
 }
 
