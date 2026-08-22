@@ -20,16 +20,16 @@ float sensorMeiaDireita = 0;
 float sensorExtremaDireita = 0;
 float sensorFrente = 0;
 //cria constantes com valores iniciais para tentativa e erro
-int Kp = 1;
-int Kd = 0;
+int Kp = 15;
 int Ki = 0;
+int Kd = 5;
 //define variáveis para cálculo
 float mediaPonderada;
-float proporcional;
+//float proporcional;
 float erroAnterior = 0;
-float derivada;
-float integral;
-float correcao;
+//float derivada;
+//float integral;
+//float correcao;
 //define variáveis de velocidade
 float velocidadeEsquerda;
 float velocidadeDireita;
@@ -78,34 +78,14 @@ void parar(){
 
 void loop()
 {
-    // defino todos os sensores como análogicos, e defino peso para cada um deles, os pesos servem para mostrar para onde está indo o erro, esquerda ou direita, pelo sinal
-    sensorExtremaEsquerda = analogRead(pinSensor1); //peso -2
-    sensorMeiaEsquerda = analogRead(pinSensor2); //peso -1
-    sensorMeiaDireita = analogRead(pinSensor3); //peso 1
-    sensorExtremaDireita = analogRead(pinSensor4); //peso 2
-    sensorFrente = analogRead(pinSensor5); //peso 0
-    
-    double somaLeituras = (sensorExtremaEsquerda + sensorMeiaEsquerda + sensorFrente + sensorExtremaDireita + sensorMeiaDireita);
-    //teste para uma situação em que todos os sensores dessem muito baixo está todo no preto(para não quebrar a divisão e impedir compilação)
-    if(somaLeituras >= 15){
-      // a média ponderada aqui é o erro, o cálculo do erro
-      mediaPonderada = (sensorExtremaEsquerda * -2 + sensorMeiaEsquerda * -1 + sensorMeiaDireita * 1 + sensorExtremaDireita * 2)/somaLeituras;
-    }else{
-      parar();
-      return;
-    }
-
-    guardaErros[contador] = mediaPonderada;
-    
-    //a proporcional nada mais é do que a constante x erro
-    proporcional = Kp * mediaPonderada;
-    //a derivada sendo a constante x o erro atual - o erro anterior
-    // a derivada é o penultimo erro - o ultimo erro (confirmar)
-    //derivada = Kd * (mediaPonderada - erroAnterior);
-
-    for(int i =0; i<guardaErros.length();i++){
-      integral = integral + guardaErros[i]
-    }
+    //Chama a função para calcular os erros dos sensores
+    float erro = calcularErrosSensor();
+    //multiplica a media ponderada pela constante proporcional
+    float proporcional = Kp * erro;
+    //chama uma função para somar todos os erros acumulados no vetor
+    float somaDosErros = calcularIntegral(proporcional);
+    //calcula a integral multiplicado o seu valor com a soma de todos os erros
+    float integral = Ki * somaDosErros;
     //correção é de fato o PID mas sem a devidada, nesse momento sem esse refino, talvez adicionar posteriormente
     correcao = proporcional + integral;
     /*aqui é onde de fato a correção é imposta, essa cálculo não faz com que sempre a direita vá mais rápido que a esquerda, por que não necessariamente correção será positivo
@@ -117,13 +97,52 @@ void loop()
     //necessário colocar constrain para limitar a velocidade
     andar(constrain(velocidadeDireita, 0, 255), constrain(velocidadeEsquerda,0,255));
     
+    //calculo da derivada caso seja necessário
+    float derivada = Kd * (erro - erroAnterior);
+
+    // correcao = proporcional  + integral + derivada
     //atualiza erroAnterior
-    erroAnterior = mediaPonderada;
-    contador = contador++;
-    if(contador > guardaErros.length()-1){
+    erroAnterior = erro;
+}
+
+float calcularErrosSensor()
+{
+    //definição de todos os sensores 
+    sensorExtremaEsquerda = analogRead(pinSensor1); //peso -2
+    sensorMeiaEsquerda = analogRead(pinSensor2); //peso -1
+    sensorMeiaDireita = analogRead(pinSensor3); //peso 1
+    sensorExtremaDireita = analogRead(pinSensor4); //peso 2
+    sensorFrente = analogRead(pinSensor5); //peso 0
+    
+    float somaLeituras = (sensorExtremaEsquerda + sensorMeiaEsquerda + sensorFrente + sensorExtremaDireita + sensorMeiaDireita);
+    //teste para uma situação em que todos os sensores dessem muito baixo está todo no preto(para não quebrar a divisão e impedir compilação)
+    if(somaLeituras >= 15){
+      // a média ponderada aqui é o erro, o cálculo do erro
+      mediaPonderada = (sensorExtremaEsquerda * -2 + sensorMeiaEsquerda * -1 + sensorMeiaDireita * 1 + sensorExtremaDireita * 2)/somaLeituras;
+    }else{
+      parar();
+      return;
+    }
+
+    return mediaPonderada;
+}
+float calcularIntegral(float erro)
+{
+  guardaErros[contador] = erro;
+
+  contador = contador++;
+
+  if(contador > guardaErros.length()-1){
       contador = 0;
     }
-    
+
+  float somaErros = 0;
+
+  for(int i =0; i<guardaErros.length();i++){
+      somaErros += guardaErros[i];
+    }
+  return somaErros;
 }
+
 
     
