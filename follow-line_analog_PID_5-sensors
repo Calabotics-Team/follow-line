@@ -14,26 +14,28 @@
 #define IN4 10
 
 // cria variáveis como double por que recebe agora valor analógico.
-double sensorExtremaEsquerda = 0;
-double sensorMeiaEsquerda = 0;
-double sensorMeiaDireita = 0;
-double sensorExtremaDireita = 0;
-double sensorFrente = 0;
+float sensorExtremaEsquerda = 0;
+float sensorMeiaEsquerda = 0;
+float sensorMeiaDireita = 0;
+float sensorExtremaDireita = 0;
+float sensorFrente = 0;
 //cria constantes com valores iniciais para tentativa e erro
 int Kp = 1;
 int Kd = 0;
 int Ki = 0;
 //define variáveis para cálculo
-double mediaPonderada;
-double proporcional;
-double erroAnterior = 0;
-double derivada;
-double correcao;
+float mediaPonderada;
+float proporcional;
+float erroAnterior = 0;
+float derivada;
+float integral;
+float correcao;
 //define variáveis de velocidade
-double velocidadeEsquerda;
-double velocidadeDireita;
+float velocidadeEsquerda;
+float velocidadeDireita;
 int velocidadeBase=200;
-
+int contador = 0;
+float guardaErros [5] = {0,0,0,0,0}; 
 void setup()
 {
     // definir todos os sensores como input para leitura
@@ -92,21 +94,36 @@ void loop()
       parar();
       return;
     }
+
+    guardaErros[contador] = mediaPonderada;
+    
     //a proporcional nada mais é do que a constante x erro
     proporcional = Kp * mediaPonderada;
     //a derivada sendo a constante x o erro atual - o erro anterior
-    derivada = Kd * (mediaPonderada - erroAnterior);
-    //correção é de fato o PID mas sem a integral, nesse momento sem esse refino, talvez adicionar posteriormente
-    correcao = proporcional + derivada;
+    // a derivada é o penultimo erro - o ultimo erro (confirmar)
+    //derivada = Kd * (mediaPonderada - erroAnterior);
+
+    for(int i =0; i<guardaErros.length();i++){
+      integral = integral + guardaErros[i]
+    }
+    //correção é de fato o PID mas sem a devidada, nesse momento sem esse refino, talvez adicionar posteriormente
+    correcao = proporcional + integral;
     /*aqui é onde de fato a correção é imposta, essa cálculo não faz com que sempre a direita vá mais rápido que a esquerda, por que não necessariamente correção será positivo
     o valor pode vim a ser negativo (temos pesos negativos) o que vai fazer o contrário o esquerdo ir mais rápido que o direito, e o fato de que uma sempre vá mais rápido que a outra
     não é um problema, pois de fato o único momento onde não deve ser feitas correções é quando correção é 0 (não há erro)*/
     velocidadeDireita = velocidadeBase + correcao;
     velocidadeEsquerda = velocidadeBase - correcao;
+    
     //necessário colocar constrain para limitar a velocidade
     andar(constrain(velocidadeDireita, 0, 255), constrain(velocidadeEsquerda,0,255));
+    
     //atualiza erroAnterior
     erroAnterior = mediaPonderada;
+    contador = contador++;
+    if(contador > guardaErros.length()-1){
+      contador = 0;
+    }
+    
 }
 
     
