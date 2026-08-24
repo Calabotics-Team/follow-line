@@ -1,24 +1,19 @@
-// ========================
-// SENSORES
-// ========================
+// Mudei os sensores para pinagem analógica
+#define pinSensor1 A4
+#define pinSensor2 A3
+#define pinSensor3 A2
+#define pinSensor4 A1
+#define pinSensor5 A0
 
-#define pinSensor1 A1
-#define pinSensor2 A2
-#define pinSensor3 A3
-#define pinSensor4 A4
-#define pinSensor5 A5
-
-// ========================
-// MOTORES
-// ========================
-
-#define ENA 5
-#define IN1 4
-#define IN2 3
+/* Mantive a configuração dos motores, igual nas versões anteriores */
+#define ENA 4
+#define IN1 5
+#define IN2 6
 
 #define ENB 9
-#define IN3 8
-#define IN4 10
+#define IN3 7
+#define IN4 8
+
 
 // ========================
 // VARIÁVEIS DOS SENSORES
