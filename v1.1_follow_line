@@ -1,25 +1,66 @@
-#define pinSensor1 3
-#define pinSensor2 4  
+// ========================
+// SENSORES
+// ========================
+
+#define pinSensor1 A1
+#define pinSensor2 A2
+#define pinSensor3 A3
+#define pinSensor4 A4
+#define pinSensor5 A5
+
+// ========================
+// MOTORES
+// ========================
 
 #define ENA 5
-#define IN1 6
-#define IN2 7
+#define IN1 4
+#define IN2 3
 
-#define ENB 10
+#define ENB 9
 #define IN3 8
-#define IN4 9
+#define IN4 10
+
+// ========================
+// VARIÁVEIS DOS SENSORES
+// ========================
+
+int sensorExtremaEsquerda = 0;
+int sensorMeiaEsquerda = 0;
+int sensorFrente = 0;
+int sensorMeiaDireita = 0;
+int sensorExtremaDireita = 0;
+
+// ========================
+// CONTROLE
+// ========================
 
 int velocidadeBase = 180;
 
+// Quanto maior, mais forte será a correção
+float Kp = 40;
+
+float erro = 0;
+float correcao = 0;
+
+int velocidadeEsquerda = 0;
+int velocidadeDireita = 0;
+
+
 void setup()
 {
+    // Sensores
     pinMode(pinSensor1, INPUT);
     pinMode(pinSensor2, INPUT);
+    pinMode(pinSensor3, INPUT);
+    pinMode(pinSensor4, INPUT);
+    pinMode(pinSensor5, INPUT);
 
+    // Motor esquerdo
     pinMode(ENA, OUTPUT);
     pinMode(IN1, OUTPUT);
     pinMode(IN2, OUTPUT);
 
+    // Motor direito
     pinMode(ENB, OUTPUT);
     pinMode(IN3, OUTPUT);
     pinMode(IN4, OUTPUT);
@@ -27,35 +68,87 @@ void setup()
     Serial.begin(9600);
 }
 
+
 void loop()
 {
-    bool sensorE = digitalRead(pinSensor1);
-    bool sensorD = digitalRead(pinSensor2);
-    
-    analogWrite(ENA, 200 );
-    analogWrite(ENB, 200);
-    
-    if(sensorE == HIGH && sensorD == HIGH) {
-      digitalWrite(IN1, HIGH);
-      digitalWrite(IN2, LOW);
-      digitalWrite(IN3, LOW);
-      digitalWrite(IN4, HIGH);
-    } else if(sensorE == LOW && sensorD == HIGH){
-      digitalWrite(IN1, LOW);
-      digitalWrite(IN2, LOW);
-      digitalWrite(IN3, LOW);
-      digitalWrite(IN4, HIGH);
-    }else if(sensorE == HIGH && sensorD == LOW){
-      digitalWrite(IN1, HIGH);
-      digitalWrite(IN2, LOW);
-      digitalWrite(IN3, LOW);
-      digitalWrite(IN4, LOW);
-    }else {
-      digitalWrite(IN1, LOW);
-      digitalWrite(IN2, LOW);
-      digitalWrite(IN3, LOW);
-      digitalWrite(IN4, LOW);
+
+    sensorExtremaEsquerda = analogRead(pinSensor1);
+    sensorMeiaEsquerda = analogRead(pinSensor2);
+    sensorFrente = analogRead(pinSensor3);
+    sensorMeiaDireita = analogRead(pinSensor4);
+    sensorExtremaDireita = analogRead(pinSensor5);
+
+
+    long soma =
+        sensorExtremaEsquerda +
+        sensorMeiaEsquerda +
+        sensorFrente +
+        sensorMeiaDireita +
+        sensorExtremaDireita;
+
+
+    if (soma > 0)
+    {
+        erro =
+            (
+                sensorExtremaEsquerda * -2.0 +
+                sensorMeiaEsquerda * -1.0 +
+                sensorFrente * 0.0 +
+                sensorMeiaDireita * 1.0 +
+                sensorExtremaDireita * 2.0
+            )
     }
-    
-    
+
+
+    correcao = Kp * erro;
+
+
+    velocidadeEsquerda = velocidadeBase + correcao;
+    velocidadeDireita = velocidadeBase - correcao;
+
+    velocidadeEsquerda = constrain(velocidadeEsquerda, 0, 255);
+    velocidadeDireita = constrain(velocidadeDireita, 0, 255);
+
+    // Motor esquerdo para frente
+    digitalWrite(IN1, HIGH);
+    digitalWrite(IN2, LOW);
+
+    // Motor direito para frente
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, HIGH);
+
+    // Controle da velocidade
+    analogWrite(ENA, velocidadeEsquerda);
+    analogWrite(ENB, velocidadeDireita);
+
+
+    // ========================
+    // MONITOR SERIAL
+    // ========================
+
+    Serial.print("EE: ");
+    Serial.print(sensorExtremaEsquerda);
+
+    Serial.print(" | ME: ");
+    Serial.print(sensorMeiaEsquerda);
+
+    Serial.print(" | C: ");
+    Serial.print(sensorFrente);
+
+    Serial.print(" | MD: ");
+    Serial.print(sensorMeiaDireita);
+
+    Serial.print(" | ED: ");
+    Serial.print(sensorExtremaDireita);
+
+    Serial.print(" | Erro: ");
+    Serial.print(erro);
+
+    Serial.print(" | Motor E: ");
+    Serial.print(velocidadeEsquerda);
+
+    Serial.print(" | Motor D: ");
+    Serial.println(velocidadeDireita);
+
+    delay(10);
 }
