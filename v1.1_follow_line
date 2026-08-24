@@ -5,7 +5,7 @@
 #define pinSensor4 A1
 #define pinSensor5 A0
 
-/* Configuração dos motores */
+/* Mantive a configuração dos motores, igual nas versões anteriores */
 #define ENA 3
 #define IN1 5
 #define IN2 6
@@ -25,16 +25,11 @@ int sensorFrente = 0;
 int sensorMeiaDireita = 0;
 int sensorExtremaDireita = 0;
 
-
 // ========================
 // CONTROLE
 // ========================
 
 int velocidadeBase = 180;
-
-// Velocidade mínima para impedir
-// que uma das rodas pare completamente
-int velocidadeMinima = 80;
 
 // Quanto maior, mais forte será a correção
 float Kp = 40;
@@ -71,9 +66,6 @@ void setup()
 
 void loop()
 {
-    // ========================
-    // LEITURA DOS SENSORES
-    // ========================
 
     sensorExtremaEsquerda = analogRead(pinSensor1);
     sensorMeiaEsquerda = analogRead(pinSensor2);
@@ -81,10 +73,6 @@ void loop()
     sensorMeiaDireita = analogRead(pinSensor4);
     sensorExtremaDireita = analogRead(pinSensor5);
 
-
-    // ========================
-    // SOMA DOS SENSORES
-    // ========================
 
     long soma =
         sensorExtremaEsquerda +
@@ -94,60 +82,27 @@ void loop()
         sensorExtremaDireita;
 
 
-    // ========================
-    // CÁLCULO DO ERRO
-    // ========================
-
     if (soma > 0)
     {
         erro =
-        (
-            sensorExtremaEsquerda * -2.0 +
-            sensorMeiaEsquerda * -1.0 +
-            sensorFrente * 0.0 +
-            sensorMeiaDireita * 1.0 +
-            sensorExtremaDireita * 2.0
-        ) / soma;
+            (
+                sensorExtremaEsquerda * -2.0 +
+                sensorMeiaEsquerda * -1.0 +
+                sensorFrente * 0.0 +
+                sensorMeiaDireita * 1.0 +
+                sensorExtremaDireita * 2.0
+            );
     }
 
-
-    // ========================
-    // CORREÇÃO PROPORCIONAL
-    // ========================
 
     correcao = Kp * erro;
 
 
-    // ========================
-    // LIMITA A CORREÇÃO
-    // ========================
-
-    correcao = constrain(
-        correcao,
-        -(velocidadeBase - velocidadeMinima),
-         (velocidadeBase - velocidadeMinima)
-    );
-
-
-    // ========================
-    // VELOCIDADE DOS MOTORES
-    // ========================
-
     velocidadeEsquerda = velocidadeBase + correcao;
     velocidadeDireita = velocidadeBase - correcao;
 
-
-    // Impede que alguma roda chegue a 0
-    velocidadeEsquerda =
-        constrain(velocidadeEsquerda, velocidadeMinima, 255);
-
-    velocidadeDireita =
-        constrain(velocidadeDireita, velocidadeMinima, 255);
-
-
-    // ========================
-    // SENTIDO DOS MOTORES
-    // ========================
+    velocidadeEsquerda = constrain(velocidadeEsquerda, 0, 255);
+    velocidadeDireita = constrain(velocidadeDireita, 0, 255);
 
     // Motor esquerdo para frente
     digitalWrite(IN1, HIGH);
@@ -157,11 +112,7 @@ void loop()
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
 
-
-    // ========================
-    // CONTROLE DA VELOCIDADE
-    // ========================
-
+    // Controle da velocidade
     analogWrite(ENA, velocidadeEsquerda);
     analogWrite(ENB, velocidadeDireita);
 
@@ -186,10 +137,7 @@ void loop()
     Serial.print(sensorExtremaDireita);
 
     Serial.print(" | Erro: ");
-    Serial.print(erro, 2);
-
-    Serial.print(" | Correcao: ");
-    Serial.print(correcao);
+    Serial.print(erro);
 
     Serial.print(" | Motor E: ");
     Serial.print(velocidadeEsquerda);
