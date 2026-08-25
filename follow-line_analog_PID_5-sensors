@@ -171,7 +171,7 @@ void setup()
  * Mantém os dois motores andando para frente.
  * A velocidade de cada motor determina a correção da trajetória.
  */
-void andar(float velocidadeDireita, float velocidadeEsquerda)
+void andar(int velocidadeDireita, int velocidadeEsquerda)
 {
     digitalWrite(IN1, HIGH);
     digitalWrite(IN2, LOW);
