@@ -6,40 +6,139 @@
 #define pinSensor5 A0
 
 /* Mantive a configuração dos motores, igual nas versões anteriores */
-#define ENA 4
+#define ENA 3 // Alterado para porta PMW
 #define IN1 5
 #define IN2 6
+/*
+Confirme se ENA realmente é o motor direito
+
+Sua função considera:
+
+ENA = direita
+ENB = esquerda
+
+Mas isso precisa coincidir com o hardware.
+
+Não confie apenas no nome.
+
+Faça dois testes:
+
+ENA ligado sozinho: qual roda gira?
+
+ENB ligado sozinho: qual roda gira?
+
+Depois disso, defina definitivamente qual é esquerda e qual é direita.
+*/
+
 
 #define ENB 9
 #define IN3 7
 #define IN4 8
 
-// Sensores
-float sensorExtremaEsquerda = 0;
-float sensorMeiaEsquerda = 0;
-float sensorMeiaDireita = 0;
-float sensorExtremaDireita = 0;
-float sensorFrente = 0;
+// Sensores - Valores alterados para int já o analogwrite lê apenas numeros inteiros
+int sensorExtremaEsquerda = 0;
+int sensorMeiaEsquerda = 0;
+int sensorMeiaDireita = 0;
+int sensorExtremaDireita = 0;
+int sensorFrente = 0;
+
+/*
+Normalize os sensores antes da média ponderada
+
+Depois da calibração, transforme todos para uma escala comum, por exemplo conceitualmente:
+
+0 = nenhuma linha
+
+1000 = linha completamente detectada
+
+Assim a média ponderada representa realmente a posição da linha e não diferenças elétricas entre os sensores.
+*/
 
 // Constantes do PID
 float Kp = 15;
 float Ki = 0;
 float Kd = 5;
+/*
+E nesse ponto seu Ki = 0 é razoável.
+
+Para seguidores de linha rápidos, normalmente é muito mais fácil começar com um:
+
+PD
+
+ou seja:
+
+P + D
+
+Primeiro faça o robô funcionar muito bem com:
+
+proporcional;
+derivativo.
+
+Depois avalie se realmente existe necessidade de integral.
+
+Integral mal regulado pode piorar curvas e criar oscilação.
+*/
+
+/*
+O derivativo deveria considerar o tempo
+
+Atualmente você considera:
+
+erro atual - erro anterior
+
+Mas existe uma diferença entre mudar 1 unidade em:
+
+2 ms;
+10 ms;
+100 ms.
+
+Matematicamente o derivativo deveria considerar:
+
+mudança do erro / mudança do tempo
+
+Isso torna o PID muito menos dependente da velocidade de execução do programa.
+*/
 
 // Variáveis para cálculo
 float mediaPonderada = 0;
 float erroAnterior = 0;
 float correcao = 0;
 
-// Variáveis de velocidade
-float velocidadeEsquerda = 0;
-float velocidadeDireita = 0;
+// Variáveis de velocidade - Valores alterados para int pelo mesmo motivo dos sensores
+int velocidadeEsquerda = 0;
+int velocidadeDireita = 0;
 
 int velocidadeBase = 200;
+
+/*
+Seu integral atual não é exatamente o integral PID clássico
+
+Você guarda apenas os últimos:
+
+5 erros
+
+Isso significa que você possui uma espécie de janela móvel.
+
+Com delay(5), aproximadamente:
+
+5 × 5 ms = 25 ms
+
+de histórico, fora o tempo de execução.
+
+É extremamente pouco.
+
+Além disso, no PID tradicional, integral está relacionado a:
+
+erro × tempo
+
+e não apenas à soma crua dos últimos erros.
+*/
 
 // Controle da memória dos erros
 int contador = 0;
 float guardaErros[5] = {0, 0, 0, 0, 0};
+
+
 
 void setup()
 {
@@ -118,6 +217,7 @@ void loop()
      * Se a correção for negativa:
      * - acontece o contrário.
      */
+
     velocidadeDireita = velocidadeBase + correcao;
     velocidadeEsquerda = velocidadeBase - correcao;
 
