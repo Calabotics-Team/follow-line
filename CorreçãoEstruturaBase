@@ -1,39 +1,21 @@
-#define pinSensor1 A4
-#define pinSensor2 A3
-#define pinSensor3 A2
-#define pinSensor4 A1
-#define pinSensor5 A0
+#define pinSensor1 3
+#define pinSensor2 4  
 
-/* Mantive a configuração dos motores, igual nas versões anteriores */
-#define ENA 3 // Alterado para porta PMW
+#define ENA 3
 #define IN1 5
 #define IN2 6
 
+#define ENB 8
+#define IN3 9
+#define IN4 7
 
-#define ENB 9
-#define IN3 7
-#define IN4 8
+int velocidadeBase = 180;
 
-int velocidadeEsquerda = 0;
-int velocidadeDireita = 0;
-
-int velocidadeBase = 200;
-
-int sensorExtremaEsquerda = 0;
-int sensorMeiaEsquerda = 0;
-int sensorMeiaDireita = 0;
-int sensorExtremaDireita = 0;
-int sensorFrente = 0;
-
-void setup() {
-    // Configuração dos sensores como entrada
+void setup()
+{
     pinMode(pinSensor1, INPUT);
     pinMode(pinSensor2, INPUT);
-    pinMode(pinSensor3, INPUT);
-    pinMode(pinSensor4, INPUT);
-    pinMode(pinSensor5, INPUT);
 
-    // Configuração dos motores
     pinMode(ENA, OUTPUT);
     pinMode(IN1, OUTPUT);
     pinMode(IN2, OUTPUT);
@@ -43,22 +25,35 @@ void setup() {
     pinMode(IN4, OUTPUT);
 
     Serial.begin(9600);
-
 }
 
-void loop() {
-  andar(velocidadeBase, velocidadeBase);
-
-}
-
-  void andar(int velocidadeDireita, int velocidadeEsquerda)
+void loop()
 {
-    digitalWrite(IN1, HIGH);
-    digitalWrite(IN2, LOW);
+    
+    analogWrite(ENA, velocidadeBase);
+    analogWrite(ENB, velocidadeBase);
 
-    digitalWrite(IN3, HIGH);
-    digitalWrite(IN4, LOW);
-
-    analogWrite(ENA, velocidadeDireita);
-    analogWrite(ENB, velocidadeEsquerda);
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+      delay(2000);
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+      delay(2000);
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, LOW);
+      delay(2000);
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, LOW);
+      delay(2000);
+    
+    
+    
 }
