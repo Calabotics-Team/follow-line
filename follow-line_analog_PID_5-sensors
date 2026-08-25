@@ -9,6 +9,12 @@
 #define ENA 3 // Alterado para porta PMW
 #define IN1 5
 #define IN2 6
+
+
+#define ENB 9
+#define IN3 7
+#define IN4 8
+
 /*
 Confirme se ENA realmente é o motor direito
 
@@ -28,14 +34,14 @@ ENA ligado sozinho: qual roda gira?
 ENB ligado sozinho: qual roda gira?
 
 Depois disso, defina definitivamente qual é esquerda e qual é direita.
+
+Testar trocar as portas do ENA e ENB para respectivamente 5 e 6, eles possuem mais frequencia pmw
+portas normais -> 490 hz
+portas 5 e 6 arduino uno -> 980 hz
 */
 
 
-#define ENB 9
-#define IN3 7
-#define IN4 8
-
-// Sensores - Valores alterados para int já o analogwrite lê apenas numeros inteiros
+// Sensores - Valores alterados para int já o analogwrite lê apenas numeros inteiros/tipo de dados permitidos inteiros
 int sensorExtremaEsquerda = 0;
 int sensorMeiaEsquerda = 0;
 int sensorMeiaDireita = 0;
