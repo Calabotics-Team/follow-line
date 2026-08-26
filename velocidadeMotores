@@ -1,0 +1,28 @@
+#define sensor 3
+int contador=0;
+unsigned long tempo;
+unsigned long tempoAuxiliar;
+void setup() {
+  
+  pinMode(sensor, INPUT_PULLUP);
+  
+  attachInterrupt(digitalPinToInterrupt(sensor), interruptFunction, RISING);
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  if(contador == 1){
+    tempoAuxiliar = millis();
+  }
+  tempo=millis()-tempoAuxiliar;
+  if(tempo>=10000 && tempo <=10500){
+    Serial.println(contador);
+    Serial.println(tempo);
+  }
+
+}
+
+void interruptFunction(){
+  contador++;
+}
