@@ -1,0 +1,40 @@
+// Mudei os sensores para pinagem analógica
+#define pinSensor1 A4
+#define pinSensor2 A3
+#define pinSensor3 A2
+#define pinSensor4 A1
+#define pinSensor5 A0
+
+void setup()
+{
+    Serial.begin(9600);
+}
+
+
+void loop()
+{
+  
+  double leitura1 = analogRead(pinSensor1);
+  double leitura2 = analogRead(pinSensor2);
+
+  double leitura3 = analogRead(pinSensor3);
+
+  double leitura4 = analogRead(pinSensor4);
+  double leitura5 = analogRead(pinSensor5);
+
+  delay(2000);
+  Serial.println("Sensor 1");
+  Serial.println(leitura1);
+  
+  Serial.println("Sensor 2");
+  Serial.println(leitura2);
+  
+  Serial.println("Sensor 3");
+  Serial.println(leitura3);
+
+  Serial.println("Sensor 4");
+  Serial.println(leitura4);
+  
+  Serial.println("Sensor 5");
+  Serial.println(leitura5);
+}
