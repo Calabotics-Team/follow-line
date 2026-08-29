@@ -98,9 +98,9 @@ void loop()
     derivada = Kd * (mediaPonderada - erroAnterior);
     //correção é de fato o PID mas sem a integral, nesse momento sem esse refino, talvez adicionar posteriormente
     correcao = proporcional + derivada;
-    /*aqui é onde de fato a correção é imposta, essa cálculo não faz com que sempre a direita vá mais rápido que a esquerda, por que não necessariamente correção será positivo
-    o valor pode vim a ser negativo (temos pesos negativos) o que vai fazer o contrário o esquerdo ir mais rápido que o direito, e o fato de que uma sempre vá mais rápido que a outra
-    não é um problema, pois de fato o único momento onde não deve ser feitas correções é quando correção é 0 (não há erro)*/
+    /*aqui é onde de fato a correção é imposta, esse cálculo faz com que a direita NÃO vá mais rápido que a esquerda, por que não necessariamente a correção será sempre positiva,
+    o valor pode vim a ser negativo (temos pesos negativos) o que vai fazer o contrário, o esquerdo ir mais rápido que o direito, e o fato de que uma sempre vá mais rápido que a outra
+    não é um problema, pois o único momento onde não deve ser feitas correções é quando ela for 0 (não há erro)*/
     velocidadeDireita = velocidadeBase + correcao;
     velocidadeEsquerda = velocidadeBase - correcao;
     //necessário colocar constrain para limitar a velocidade
