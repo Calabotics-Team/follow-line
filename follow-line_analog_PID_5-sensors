@@ -1,9 +1,9 @@
 //mudei os sensores para pinagem analógica
-#define pinSensor1 A1 
-#define pinSensor2 A2
-#define pinSensor3 A3
-#define pinSensor4 A4
-#define pinSensor5 A5
+#define pinSensor1 A4 
+#define pinSensor2 A3
+#define pinSensor3 A1
+#define pinSensor4 A2
+#define pinSensor5 A0
 
 /* mantive a configuração dos motores, igual nas versões anteriores */
 #define ENA 3
@@ -20,7 +20,7 @@ double sensorMeiaDireita = 0;
 double sensorExtremaDireita = 0;
 double sensorFrente = 0;
 //cria constantes com valores iniciais para tentativa e erro
-float Kp = 12;
+float Kp = 300;
 float Kd = 0;
 float Ki = 0;
 //define variáveis para cálculo
@@ -77,34 +77,45 @@ void parar(){
 void loop()
 {
     // defino todos os sensores como análogicos, e defino peso para cada um deles, os pesos servem para mostrar para onde está indo o erro, esquerda ou direita, pelo sinal
-    sensorExtremaEsquerda = analogRead(pinSensor1); //peso -2
+     sensorExtremaEsquerda = analogRead(pinSensor1); //peso -2
     sensorMeiaEsquerda = analogRead(pinSensor2); //peso -1
-    sensorMeiaDireita = analogRead(pinSensor3); //peso 1
-    sensorExtremaDireita = analogRead(pinSensor4); //peso 2
-    sensorFrente = analogRead(pinSensor5); //peso 0
+    sensorMeiaDireita = analogRead(pinSensor4); //peso 1
+    sensorExtremaDireita = analogRead(pinSensor5); //peso 2
+    sensorFrente = analogRead(pinSensor3); //peso 0
     
     double somaLeituras = (sensorExtremaEsquerda + sensorMeiaEsquerda + sensorFrente + sensorExtremaDireita + sensorMeiaDireita);
     //teste para uma situação em que todos os sensores dessem muito baixo está todo no preto(para não quebrar a divisão e impedir compilação)
-    if(somaLeituras >= 2250){
+    if(somaLeituras >= 350){
       // a média ponderada aqui é o erro, o cálculo do erro
       mediaPonderada = (sensorExtremaEsquerda * -2 + sensorMeiaEsquerda * -1 + sensorMeiaDireita * 1 + sensorExtremaDireita * 2)/somaLeituras;
     }else{
       parar();
       return;
     }
+    
     //a proporcional nada mais é do que a constante x erro
     proporcional = Kp * mediaPonderada;
+    
     //a derivada sendo a constante x o erro atual - o erro anterior
     derivada = Kd * (mediaPonderada - erroAnterior);
+    
     //correção é de fato o PID mas sem a integral, nesse momento sem esse refino, talvez adicionar posteriormente
     correcao = proporcional + derivada;
-    /*aqui é onde de fato a correção é imposta, esse cálculo faz com que a direita NÃO vá mais rápido que a esquerda, por que não necessariamente a correção será sempre positiva,
-    o valor pode vim a ser negativo (temos pesos negativos) o que vai fazer o contrário, o esquerdo ir mais rápido que o direito, e o fato de que uma sempre vá mais rápido que a outra
-    não é um problema, pois o único momento onde não deve ser feitas correções é quando ela for 0 (não há erro)*/
+    Serial.print("correcao: ");
+    Serial.println(correcao);
+    
+    /*aqui é onde de fato a correção é imposta, essa cálculo não faz com que sempre a direita vá mais rápido que a esquerda, por que não necessariamente correção será positivo
+    o valor pode vim a ser negativo (temos pesos negativos) o que vai fazer o contrário o esquerdo ir mais rápido que o direito, e o fato de que uma sempre vá mais rápido que a outra
+    não é um problema, pois de fato o único momento onde não deve ser feitas correções é quando correção é 0 (não há erro)*/
+   
     velocidadeDireita = velocidadeBase + correcao;
     velocidadeEsquerda = velocidadeBase - correcao;
+    Serial.print("Velocidade Direita: ");
+    Serial.println(velocidadeDireita);
+    Serial.print("Velocidade Esquerda: ");
+    Serial.println(velocidadeEsquerda);
     //necessário colocar constrain para limitar a velocidade
-    andar(constrain(velocidadeDireita, 68, 255), constrain(velocidadeEsquerda,68,255));
+    andar(velocidadeDireita, velocidadeEsquerda);
     //atualiza erroAnterior
     erroAnterior = mediaPonderada;
 }
