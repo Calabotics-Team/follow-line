@@ -17,13 +17,6 @@
 2. Selecione **Download ZIP**
 3. Extraia o arquivo em uma pasta de sua preferência
 
-Ou use Git:
-
-```bash
-git clone <URL-do-repositório>
-cd line-follower-robot
-```
-
 ### Passo 2: Instalar as Bibliotecas
 
 #### Opção A: Instalação Automática (Recomendado)
