@@ -1,3 +1,7 @@
+
+/* ============ CÓDIGO DE TESTE ========== */ 
+// Em teoria, é o código PD completo, não é necessário o integral.
+
 /*Este código é baseado no commit 255ffeead31a6e13ee9d55f82e63747157a2e0a0 de Rebeca, na branch analog_5_sensors*/
 
 /*O objetivo desse código é para fazer um teste no robô, por isso, jogarei este na branch test_v.1, basicamente, o intuito é 
