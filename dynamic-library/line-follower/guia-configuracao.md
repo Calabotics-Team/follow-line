@@ -5,7 +5,7 @@
 - Arduino Uno (ou compatível)
 - Arduino IDE instalado
 - Cabo USB para Arduino
-- Bibliotecas incluídas neste repositório
+- Bibliotecas incluídas neste arquivo
 
 ---
 
@@ -177,7 +177,7 @@ const double KD = 0.02;  // Aumentado de 0.01
 
 Para entender melhor o código e as decisões de design, consulte:
 
-- `code-doc.md` - Documentação detalhada do código
+- `documentacao-codigo.md` - Documentação detalhada do código
 - `libraries/DynamicMotorDriver/README.md` - Documentação da biblioteca Motor
 - `libraries/QTRSensors/README.md` - Documentação da biblioteca QTR
 
