@@ -23,6 +23,7 @@ Esse código utiliza duas bibliotecas (talvez nem use as duas):
 - https://github.com/pololu/qtr-sensors-arduino/tree/master/examples (biblioteca QTRSensors)
 - https://github.com/mcc-robotics/Dynamic_Motor_Driver (biblioteca Dynamic Motor Driver)
 - https://robotresearchlab.com/2019/02/16/pid-line-follower-tuning/ (para entender como funciona a leitura)
+- https://www.youtube.com/watch?v=PP4fvBVe3rI (vídeo que me guiou para desenvolver o código)
 
 A intenção é adaptar o que está nessas referências para o nosso caso.
 
