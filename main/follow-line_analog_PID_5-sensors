@@ -115,6 +115,17 @@ void normalizar(){
   }
 }
 
+void re(){
+  //TO DO implementar dar ré até encontrar a linha de volta por um tempo, se nao achar chamar parar()
+       digitalWrite(IN1, LOW);
+       digitalWrite(IN2, HIGH);
+       digitalWrite(IN3, LOW);
+       digitalWrite(IN4, HIGH);
+       analogWrite(ENA, 120);
+       analogWrite (ENB, 120);
+}
+
+
 void loop()
 {
    leitura();
@@ -122,25 +133,27 @@ void loop()
    normalizar();
    calcularSomaNormalizados();
    somaLeituras = leituras[0]+leituras[1]+leituras[2]+leituras[3]+leituras[4];
-    if(somaLeituras >= 700){
-      // a média ponderada aqui é o erro, o cálculo do erro
+    if(somaLeituras >= 300){
       if(somaNormalizados > 0){
-        mediaPonderada = (normalizado[0] * -2 + normalizado[1] * -1 + normalizado[3]* 1 + normalizado[4] * 2)/somaNormalizados;  
+        mediaPonderada = (normalizado[0] * -2 + normalizado[1] * -1 + normalizado[3]* 1 + normalizado[4] * 2)/somaNormalizados;
+        proporcional = Kp * mediaPonderada;
+    
+        derivada = Kd * (mediaPonderada - erroAnterior);
+        
+        correcao = proporcional + derivada;
+        
+        velocidadeDireita = constrain(velocidadeBase + correcao, 68, 255);
+        velocidadeEsquerda = constrain(velocidadeBase - correcao, 68, 255);
+        andar(velocidadeDireita,velocidadeEsquerda);
+        erroAnterior = mediaPonderada;
       }
+    }else if(erroAnterior > 0){
+        // TODO: andar(velocidadeDireita,velocidadeEsquerda);
+        parar();
     }else{
-      parar();
-      return;
+       // TODO re();
+       parar();
     }
-    proporcional = Kp * mediaPonderada;
-    
-    derivada = Kd * (mediaPonderada - erroAnterior);
-    
-    correcao = proporcional + derivada;
-    
-    velocidadeDireita = constrain(velocidadeBase + correcao, 68, 255);
-    velocidadeEsquerda = constrain(velocidadeBase - correcao, 68, 255);
-    andar(velocidadeDireita,velocidadeEsquerda);
-    erroAnterior = mediaPonderada;
     
  
 }
