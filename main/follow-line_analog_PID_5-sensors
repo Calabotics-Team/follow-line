@@ -1,8 +1,8 @@
-//mudei os sensores para pinagem analógica
+//ATENÇÃO OS PINOS DOS SENSORES ESTÃO DIFERENTES, EM ORDEM
 #define pinSensor1 A4 
 #define pinSensor2 A3
-#define pinSensor3 A1
-#define pinSensor4 A2
+#define pinSensor3 A2
+#define pinSensor4 A1
 #define pinSensor5 A0
 
 /* mantive a configuração dos motores, igual nas versões anteriores*/
@@ -13,26 +13,30 @@
 #define IN3 7
 #define IN4 8
 
-// cria variáveis como double por que recebe agora valor analógico.
-double sensorExtremaEsquerda = 0;
-double sensorMeiaEsquerda = 0;
-double sensorMeiaDireita = 0;
-double sensorExtremaDireita = 0;
-double sensorFrente = 0;
-//cria constantes com valores iniciais para tentativa e erro
+//cria vetores para leitura e para minimo e maximo das leituras
+float leituras[5];
+float maximo [5] = {0,0,0,0,0};
+float minimo [5] = {1023, 1023, 1023, 1023, 1023};
+float normalizado[5];
 
-float Kp = 600;
+//cria constantes com valores iniciais para tentativa e erro
+float Kp = 100;
 float Kd = 0;
 float Ki = 0;
+
 //define variáveis para cálculo
-double mediaPonderada;
-double proporcional;
-double erroAnterior = 0;
-double derivada;
-double correcao;
+float somaNormalizados =0;
+float mediaPonderada=0;
+float proporcional;
+float erroAnterior = 0;
+float derivada;
+float correcao;
+float faixa;
+float somaLeituras;
+
 //define variáveis de velocidade
-double velocidadeEsquerda;
-double velocidadeDireita;
+float velocidadeEsquerda;
+float velocidadeDireita;
 int velocidadeBase=120;
 
 void setup()
@@ -54,9 +58,8 @@ void setup()
     
     Serial.begin(9600);
 }
-/*andar: definir os IN1, IN2, IN3, IN4 com constantes, por que os motores devem sempre andar para frente, a velocidade que dita a direção, chutei se essa definição é que manda para frente
-necessário confirmar */
-void andar(double velocidadeDireita, double velocidadeEsquerda) 
+
+void andar(float velocidadeDireita, float velocidadeEsquerda) 
 {    
        digitalWrite(IN1, HIGH);
        digitalWrite(IN2, LOW);
@@ -75,70 +78,68 @@ void parar(){
        analogWrite (ENB, LOW);
 }
 
+void calibrar(float leituras [5]){
+    for (int i=0; i<5; i++){
+        if(leituras[i]<minimo[i]){
+          minimo[i]=leituras[i];
+        }
+        if(leituras[i]>maximo[i]){
+          maximo[i]=leituras[i];
+        }
+    }
+}
+
+void leitura(){
+    leituras[0] = analogRead(pinSensor1); //peso -2
+    leituras[1] = analogRead(pinSensor2); //peso -1
+    leituras[2] = analogRead(pinSensor3); //peso 0
+    leituras[3] = analogRead(pinSensor4); //peso 1
+    leituras[4] = analogRead(pinSensor5) ; //peso 2
+}
+
+void calcularSomaNormalizados(){
+  somaNormalizados = 0;
+  for(int i=0;i<5;i++){
+    somaNormalizados+=normalizado[i];
+  }
+}
+  
+void normalizar(){
+  for(int i = 0; i < 5; i++){
+    faixa = maximo[i] - minimo[i];
+    if(faixa <= 0){
+      normalizado[i] = 0; // evita divisão por zero
+    } else {
+      normalizado[i] = (leituras[i] - minimo[i]) / faixa;
+    }
+  }
+}
+
 void loop()
 {
-    // defino todos os sensores como análogicos, e defino peso para cada um deles, os pesos servem para mostrar para onde está indo o erro, esquerda ou direita, pelo sinal
-    sensorExtremaEsquerda = analogRead(pinSensor1); //peso -2
-    sensorMeiaEsquerda = analogRead(pinSensor2); //peso -1
-    sensorMeiaDireita = analogRead(pinSensor4); //peso 1
-    sensorExtremaDireita = analogRead(pinSensor5); //peso 2
-    sensorFrente = analogRead(pinSensor3); //peso 0
-
-    Serial.println();
-    Serial.print("Sensor Extrema Esquerda: ");
-    Serial.println(sensorExtremaEsquerda);
-    Serial.println();
-    Serial.print("Sensor Meia Esquerda: ");
-    Serial.println(sensorMeiaEsquerda);
-    Serial.println();
-    Serial.print("Sensor Frente: ");
-    Serial.println(sensorFrente);
-    Serial.println();
-    Serial.print("Sensor Meia Direita: ");
-    Serial.println(sensorMeiaDireita);
-    Serial.println();
-    Serial.print("Sensor Extrema Direita: ");
-    Serial.println(sensorExtremaDireita);
-    Serial.println();
-    
-
-
-    
-    double somaLeituras = (sensorExtremaEsquerda + sensorMeiaEsquerda + sensorFrente + sensorExtremaDireita + sensorMeiaDireita);
-    //teste para uma situação em que todos os sensores dessem muito baixo está todo no preto(para não quebrar a divisão e impedir compilação)
+   leitura();
+   calibrar(leituras);
+   normalizar();
+   calcularSomaNormalizados();
+   somaLeituras = leituras[0]+leituras[1]+leituras[2]+leituras[3]+leituras[4];
     if(somaLeituras >= 700){
       // a média ponderada aqui é o erro, o cálculo do erro
-      mediaPonderada = (sensorExtremaEsquerda * -2 + sensorMeiaEsquerda * -1 + sensorMeiaDireita * 1 + sensorExtremaDireita * 2)/somaLeituras;
+      if(somaNormalizados > 0){
+        mediaPonderada = (normalizado[0] * -2 + normalizado[1] * -1 + normalizado[3]* 1 + normalizado[4] * 2)/somaNormalizados;  
+      }
     }else{
       parar();
-      delay(2000);
       return;
     }
-    
-    //a proporcional nada mais é do que a constante x erro
     proporcional = Kp * mediaPonderada;
     
-    //a derivada sendo a constante x o erro atual - o erro anterior
     derivada = Kd * (mediaPonderada - erroAnterior);
     
-    //correção é de fato o PID mas sem a integral, nesse momento sem esse refino, talvez adicionar posteriormente
     correcao = proporcional + derivada;
-    Serial.print("correcao: ");
-    Serial.println(correcao);
-    
-    /*aqui é onde de fato a correção é imposta, essa cálculo não faz com que sempre a direita vá mais rápido que a esquerda, por que não necessariamente correção será positivo
-    o valor pode vim a ser negativo (temos pesos negativos) o que vai fazer o contrário o esquerdo ir mais rápido que o direito, e o fato de que uma sempre vá mais rápido que a outra
-    não é um problema, pois de fato o único momento onde não deve ser feitas correções é quando correção é 0 (não há erro)*/
     
     velocidadeDireita = constrain(velocidadeBase + correcao, 68, 255);
     velocidadeEsquerda = constrain(velocidadeBase - correcao, 68, 255);
-    Serial.print("Velocidade Direita: ");
-    Serial.println(velocidadeDireita);
-    Serial.print("Velocidade Esquerda: ");
-    Serial.println(velocidadeEsquerda);
-    //necessário colocar constrain para limitar a velocidade
     andar(velocidadeDireita,velocidadeEsquerda);
-    //atualiza erroAnterior
     erroAnterior = mediaPonderada;
     
  
