@@ -20,8 +20,8 @@ float minimo [5] = {1023, 1023, 1023, 1023, 1023};
 float normalizado[5];
 
 //cria constantes com valores iniciais para tentativa e erro
-float Kp = 100;
-float Kd = 0;
+float Kp = 300;
+float Kd = 100;
 float Ki = 0;
 
 //define variáveis para cálculo
@@ -142,8 +142,8 @@ void loop()
         
         correcao = proporcional + derivada;
         
-        velocidadeDireita = constrain(velocidadeBase + correcao, 68, 255);
-        velocidadeEsquerda = constrain(velocidadeBase - correcao, 68, 255);
+        velocidadeDireita = constrain(velocidadeBase - correcao, 68, 255);
+        velocidadeEsquerda = constrain(velocidadeBase + correcao, 68, 255);
         andar(velocidadeDireita,velocidadeEsquerda);
         erroAnterior = mediaPonderada;
       }
