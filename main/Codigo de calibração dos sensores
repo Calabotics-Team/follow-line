@@ -1,0 +1,193 @@
+// Sensores em ordem: esquerda → direita
+#define pinSensor1 A4
+#define pinSensor2 A3
+#define pinSensor3 A2
+#define pinSensor4 A1
+#define pinSensor5 A0
+
+const byte pinosSensores[5] = {
+  pinSensor1,
+  pinSensor2,
+  pinSensor3,
+  pinSensor4,
+  pinSensor5
+};
+
+int leituras[5];
+int maximo[5] = {0, 0, 0, 0, 0};
+int minimo[5] = {1023, 1023, 1023, 1023, 1023};
+
+float normalizado[5];
+
+float somaNormalizados = 0;
+float mediaPonderada = 0;
+
+const int pesos[5] = {-2, -1, 0, 1, 2};
+
+// Você terá 5 segundos para movimentar os sensores
+// lateralmente sobre o preto e o branco.
+const unsigned long TEMPO_CALIBRACAO = 5000;
+
+// Como as faixas medidas ficaram próximas de 1000,
+// uma faixa abaixo de 700 indica calibração incompleta.
+const int FAIXA_MINIMA = 700;
+
+unsigned long ultimaImpressao = 0;
+
+void leitura() {
+  for (int i = 0; i < 5; i++) {
+    leituras[i] = analogRead(pinosSensores[i]);
+  }
+}
+
+void calibrar() {
+  for (int i = 0; i < 5; i++) {
+    if (leituras[i] < minimo[i]) {
+      minimo[i] = leituras[i];
+    }
+
+    if (leituras[i] > maximo[i]) {
+      maximo[i] = leituras[i];
+    }
+  }
+}
+
+bool calibracaoValida() {
+  bool valida = true;
+
+  Serial.println();
+  Serial.println("RESULTADO DA CALIBRACAO");
+  Serial.println("Sensor | Minimo | Maximo | Faixa");
+
+  for (int i = 0; i < 5; i++) {
+    int faixa = maximo[i] - minimo[i];
+
+    Serial.print("S");
+    Serial.print(i + 1);
+    Serial.print("     | ");
+    Serial.print(minimo[i]);
+    Serial.print("     | ");
+    Serial.print(maximo[i]);
+    Serial.print("     | ");
+    Serial.println(faixa);
+
+    if (faixa < FAIXA_MINIMA) {
+      valida = false;
+    }
+  }
+
+  return valida;
+}
+
+void normalizar() {
+  for (int i = 0; i < 5; i++) {
+    float faixa = maximo[i] - minimo[i];
+
+    if (faixa <= 0) {
+      normalizado[i] = 0;
+    } else {
+      normalizado[i] =
+        (leituras[i] - minimo[i]) / faixa;
+
+      // Impede valores menores que 0 ou maiores que 1
+      normalizado[i] =
+        constrain(normalizado[i], 0.0, 1.0);
+    }
+  }
+}
+
+void calcularPosicao() {
+  somaNormalizados = 0;
+  float somaPonderada = 0;
+
+  for (int i = 0; i < 5; i++) {
+    somaNormalizados += normalizado[i];
+    somaPonderada += normalizado[i] * pesos[i];
+  }
+
+  if (somaNormalizados > 0.05) {
+    mediaPonderada =
+      somaPonderada / somaNormalizados;
+  }
+}
+
+void imprimirDiagnostico() {
+  Serial.print("Normalizados: [");
+
+  for (int i = 0; i < 5; i++) {
+    Serial.print(normalizado[i], 2);
+
+    if (i < 4) {
+      Serial.print(", ");
+    }
+  }
+
+  Serial.print("] | Soma: ");
+  Serial.print(somaNormalizados, 2);
+
+  if (somaNormalizados > 0.05) {
+    Serial.print(" | Posicao: ");
+    Serial.println(mediaPonderada, 2);
+  } else {
+    Serial.println(" | LINHA PERDIDA");
+  }
+}
+
+void setup() {
+  Serial.begin(9600);
+
+  for (int i = 0; i < 5; i++) {
+    pinMode(pinosSensores[i], INPUT);
+  }
+
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  Serial.println("PREPARE-SE PARA CALIBRAR.");
+  Serial.println("Mova todos os sensores sobre o preto e o branco.");
+  Serial.println("A calibracao comecara em 2 segundos.");
+
+  delay(2000);
+
+  Serial.println("CALIBRANDO...");
+  digitalWrite(LED_BUILTIN, HIGH);
+
+  unsigned long inicioCalibracao = millis();
+
+  while (millis() - inicioCalibracao < TEMPO_CALIBRACAO) {
+    leitura();
+    calibrar();
+  }
+
+  digitalWrite(LED_BUILTIN, LOW);
+
+  if (!calibracaoValida()) {
+    Serial.println();
+    Serial.println("CALIBRACAO INVALIDA!");
+    Serial.println("Algum sensor nao enxergou as duas cores.");
+    Serial.println("Reinicie o Arduino e tente novamente.");
+
+    // Pisca continuamente para indicar falha
+    while (true) {
+      digitalWrite(LED_BUILTIN, HIGH);
+      delay(200);
+      digitalWrite(LED_BUILTIN, LOW);
+      delay(200);
+    }
+  }
+
+  Serial.println();
+  Serial.println("CALIBRACAO CONCLUIDA.");
+  Serial.println("Agora posicione a linha em diferentes sensores.");
+}
+
+void loop() {
+  leitura();
+  normalizar();
+  calcularPosicao();
+
+  // Imprime a cada 100 ms sem bloquear as leituras
+  if (millis() - ultimaImpressao >= 100) {
+    ultimaImpressao = millis();
+    imprimirDiagnostico();
+  }
+}
