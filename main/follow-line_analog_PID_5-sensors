@@ -42,7 +42,7 @@ int velocidadeBase=80;
 //variáveis para tempo (recuperação)
 unsigned long tempoInicioRecuperacao = 0;
 bool recuperando = false;
-const unsigned long TEMPO_MAX_RECUPERACAO = 1000;
+const unsigned long TEMPO_MAX_RECUPERACAO = 350;
 
 void setup()
 {
@@ -89,16 +89,15 @@ void recuperar(){
         recuperando = true;
     }
 
-    if(millis() - tempoInicioRecuperacao > TEMPO_MAX_RECUPERACAO){
-        parar();
-        return;
+    while(millis() - tempoInicioRecuperacao < TEMPO_MAX_RECUPERACAO){
+       if(erroAnterior > 0){
+          andar(180, 0); 
+      }else{
+          andar(0, 180);
+      }
     }
-
-    if(erroAnterior > 0){
-        andar(255, 0); 
-    }else{
-        andar(0, 255);
-    }
+    return;
+   
 }
 void calibrar(float leituras [5]){
     for (int i=0; i<5; i++){
@@ -165,8 +164,8 @@ void loop()
         
         correcao = proporcional + derivada;
         
-        velocidadeDireita = constrain(velocidadeBase + correcao, 0, 255);
-        velocidadeEsquerda = constrain(velocidadeBase - correcao, 0, 255);
+        velocidadeDireita = constrain(velocidadeBase + correcao, 0, 215);
+        velocidadeEsquerda = constrain(velocidadeBase - correcao, 0, 215);
         andar(velocidadeDireita,velocidadeEsquerda);
         erroAnterior = mediaPonderada;
       }
