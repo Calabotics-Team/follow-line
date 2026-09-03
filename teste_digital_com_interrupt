@@ -1,0 +1,199 @@
+//ATENÇÃO OS PINOS DOS SENSORES ESTÃO DIFERENTES, EM ORDEM
+#define pinSensor1 3 
+#define pinSensor2 4
+#define pinSensor3 5
+#define pinSensor4 6
+#define pinSensor5 2
+
+/* mantive a configuração dos motores, igual nas versões anteriores*/
+#define ENA 9
+#define IN1 8
+#define IN2 11
+#define ENB 10
+#define IN3 12
+#define IN4 13
+
+//cria vetores para leitura e para minimo e maximo das leituras
+float leituras[5];
+
+//cria constantes com valores iniciais para tentativa e erro
+float Kp = 20;
+float Kd = 20;
+float Ki = 0;
+
+float mediaPonderada=0;
+float proporcional;
+float erroAnterior = 0;
+float derivada;
+float correcao;
+float somaLeituras;
+
+//define variáveis de velocidade
+float velocidadeEsquerda;
+float velocidadeDireita;
+int velocidadeBase=80;
+
+//variáveis para tempo (recuperação)
+unsigned long tempoInicioRecuperacao = 0;
+bool recuperando = false;
+const unsigned long TEMPO_MAX_RECUPERACAO = 450;
+unsigned long tempoAndarCurva=0;
+
+volatile bool temCurva = false;
+int contador=0; 
+
+
+
+void setup()
+{
+    // definir todos os sensores como input para leitura
+    pinMode(pinSensor1, INPUT);
+    pinMode(pinSensor2, INPUT);
+    pinMode(pinSensor3, INPUT);
+    pinMode(pinSensor4, INPUT);
+    pinMode(pinSensor5, INPUT);
+    
+    pinMode(ENA, OUTPUT);
+    pinMode(IN1, OUTPUT);
+    pinMode(IN2, OUTPUT);
+
+    pinMode(ENB, OUTPUT);
+    pinMode(IN3, OUTPUT);
+    pinMode(IN4, OUTPUT);
+    //attachInterrupt(digitalPinToInterrupt(pinSensor1),faixasCurvas, RISING);
+    
+    Serial.begin(9600);
+}
+
+void andar(float velocidadeDireita, float velocidadeEsquerda) 
+{    
+       digitalWrite(IN1, HIGH);
+       digitalWrite(IN2, LOW);
+       digitalWrite(IN3, HIGH);
+       digitalWrite(IN4, LOW);
+       analogWrite(ENA, velocidadeDireita);
+       analogWrite (ENB, velocidadeEsquerda);
+}
+void parar(){
+  //TODO: implementar um delay que aguarda e verifica novamente se ainda todos os sensores estão muito baixos, se sim, para, se não, dá return
+       digitalWrite(IN1, LOW);
+       digitalWrite(IN2, LOW);
+       digitalWrite(IN3, LOW);
+       digitalWrite(IN4, LOW);
+       analogWrite(ENA, LOW);
+       analogWrite (ENB, LOW);
+}
+
+void recuperar(){
+    if(!recuperando){
+        tempoInicioRecuperacao = millis();
+        recuperando = true;
+    }
+
+    while(millis() - tempoInicioRecuperacao < TEMPO_MAX_RECUPERACAO){
+       if(erroAnterior > 0){
+          andar(180, 0); 
+      }else{
+          andar(0, 180);
+      }
+    }
+    return;
+   
+}
+
+
+void leitura(){
+    leituras[0] = digitalRead(pinSensor1); //peso -2
+    leituras[1] = digitalRead(pinSensor2); //peso -1
+    leituras[2] = digitalRead(pinSensor3); //peso 0
+    leituras[3] = digitalRead(pinSensor4); //peso 1
+    leituras[4] = digitalRead(pinSensor5) ; //peso 2
+    Serial.print("Sensor 1: ");
+    Serial.println(leituras[0]);
+    Serial.print("Sensor 2: ");
+    Serial.println(leituras[1]);
+    Serial.print("Sensor 3: ");
+    Serial.println(leituras[2]);
+    Serial.print("Sensor 4: ");
+    Serial.println(leituras[3]);
+    Serial.print("Sensor 5: ");
+    Serial.println(leituras[4]);
+    Serial.println();
+    
+}
+
+
+void re(){
+  //TO DO implementar dar ré se ele tava andando reto, e se perdeu
+       digitalWrite(IN1, LOW);
+       digitalWrite(IN2, HIGH);
+       digitalWrite(IN3, LOW);
+       digitalWrite(IN4, HIGH);
+       analogWrite(ENA, 120);
+       analogWrite (ENB, 120);
+}
+
+
+void loop()
+{
+
+   if(temCurva && contador==1){
+    contador ++;
+    tempoAndarCurva = millis();
+    while(millis() - tempoAndarCurva <=200){
+      andar(velocidadeBase, velocidadeBase);
+    }
+    leitura();
+    mediaPonderada = (leituras[0] * -2 + leituras[1] * -1 + leituras[3]* 1 + leituras[4] * 2)/somaLeituras;
+    if(mediaPonderada > 0){ //virar para esquerda
+      andar(255,0);
+    }else{
+      andar(0,255);
+    }
+    temCurva = false;
+    erroAnterior = mediaPonderada;
+    return;
+   }
+   leitura();
+   somaLeituras = leituras[0]+leituras[1]+leituras[2]+leituras[3]+leituras[4];
+    if(somaLeituras >= 1){
+        recuperando = false;
+        mediaPonderada = (leituras[0] * -2 + leituras[1] * -1 + leituras[3]* 1 + leituras[4] * 2)/somaLeituras;
+        Serial.print("media ponderada: ");
+        Serial.println(mediaPonderada);
+        Serial.println();
+        proporcional = Kp * mediaPonderada;
+    
+        derivada = Kd * (mediaPonderada - erroAnterior);
+        
+        correcao = proporcional + derivada;
+        Serial.print("correção: ");
+        Serial.println(correcao);
+        Serial.println();
+        velocidadeDireita = constrain(velocidadeBase - correcao, 0, 215);
+        velocidadeEsquerda = constrain(velocidadeBase + correcao, 0, 215);
+        Serial.print("Velocidade Direita: ");
+        Serial.println(velocidadeDireita);
+        Serial.print("Velocidade Esquerda: ");
+        Serial.println(velocidadeEsquerda);
+        andar(velocidadeDireita,velocidadeEsquerda);
+        erroAnterior = mediaPonderada;
+ 
+   }else{
+       recuperar();
+    }
+
+    delay(5000);
+}
+
+  
+  
+
+void faixasCurvas(){
+  temCurva = true;
+  contador++;
+  if(contador > 1){
+    contador = 1;
+  }
+}
+    
