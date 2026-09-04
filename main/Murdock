@@ -27,7 +27,6 @@ const float Kd = 0;
 float somaNormalizados = 0;
 float mediaPonderada = 0;
 float erroAnterior = 0;
-float derivada;
 const float linhaLimiar = 0.2;
 
 //define variáveis de velocidade
@@ -63,7 +62,7 @@ void setup() {
   Serial.begin(9600);
 }
 
-void andar(float velocidadeDireita, float velocidadeEsquerda) {
+void andar(int velocidadeDireita, int velocidadeEsquerda) {
   if (velocidadeDireita <= 0) velocidadeDireita = 0;
   if (velocidadeEsquerda <= 0) velocidadeEsquerda = 0;
 
@@ -113,17 +112,6 @@ void recuperar() {
   }
   return;
 }
-void calibrar(float leituras[5]) {
-  for (int i = 0; i < 5; i++) {
-    if (leituras[i] < minimo[i]) {
-      minimo[i] = leituras[i];
-    }
-    if (leituras[i] > maximo[i]) {
-      maximo[i] = leituras[i];
-    }
-  }
-}
-
 void leitura() {
   leituras[0] = analogRead(pinSensor1);  //peso -2
   leituras[1] = analogRead(pinSensor2);  //peso -1
@@ -175,13 +163,13 @@ void loop() {
   if (tempoAtual - ultimaExec < intervalo) {
     return;
   }
-  ultimoControle = tempoAtual;
+  ultimaExec = tempoAtual;
   leitura();
   normalizar();
   calcularSomaNormalizados();
   recuperando = false;
 
-  if (somaNormalizados >= limiarLinha) {
+  if (somaNormalizados >= linhaLimiar) {
 
     mediaPonderada =
       (normalizado[0] * -2 + normalizado[1] * -1 + normalizado[3] * 1 + normalizado[4] * 2) / somaNormalizados;
