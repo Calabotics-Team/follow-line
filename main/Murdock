@@ -172,7 +172,7 @@ void re() {
 void loop() {
   unsigned long tempoAtual = millis();
 
-  if (tempoAtual - ultimoControle < INTERVALO_CONTROLE) {
+  if (tempoAtual - ultimaExec < intervalo) {
     return;
   }
   ultimoControle = tempoAtual;
