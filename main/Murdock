@@ -38,6 +38,8 @@ int velocidadeDireita;
 const int velocidadeBase = 80;
 
 //variáveis para tempo (recuperação)
+unsigned long ultimaExec = 0;
+const unsigned long intervalo = 5;
 unsigned long tempoInicioRecuperacao = 0;
 bool recuperando = false;
 const unsigned long TEMPO_MAX_RECUPERACAO = 400;
@@ -168,7 +170,12 @@ void re() {
 
 
 void loop() {
+  unsigned long tempoAtual = millis();
 
+  if (tempoAtual - ultimoControle < INTERVALO_CONTROLE) {
+    return;
+  }
+  ultimoControle = tempoAtual;
   leitura();
   normalizar();
   calcularSomaNormalizados();
