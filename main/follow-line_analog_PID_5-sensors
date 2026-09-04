@@ -38,7 +38,7 @@ const int velocidadeBase = 80;
 
 //variáveis para tempo (recuperação)
 unsigned long ultimaExec = 0;
-const unsigned long intervalo = 5;
+const unsigned long intervalo = 6;
 unsigned long tempoInicioRecuperacao = 0;
 bool recuperando = false;
 const unsigned long TEMPO_MAX_RECUPERACAO = 400;
@@ -105,9 +105,9 @@ void recuperar() {
 
   while (millis() - tempoInicioRecuperacao < TEMPO_MAX_RECUPERACAO) {
     if (erroAnterior > 0) {
-      re();
+      reDireita(120);
     } else {
-      re();
+      reEsquerda(120);
     }
   }
   return;
@@ -145,14 +145,24 @@ void normalizar() {
   }
 }
 
-void re() {
+void reEsquerda(int velocidadeRe) {
 
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, HIGH);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
-  analogWrite(ENA, 120);
-  analogWrite(ENB, 120);
+  analogWrite(ENA, velocidadeBase);
+  analogWrite(ENB, 0);
+}
+
+void reDireita(int velocidadeRe) {
+
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENA, 0);
+  analogWrite(ENB, velocidadeBase);
 }
 
 
