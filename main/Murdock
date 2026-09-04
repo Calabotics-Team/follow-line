@@ -1,5 +1,5 @@
 //ATENÇÃO OS PINOS DOS SENSORES ESTÃO DIFERENTES, EM ORDEM
-#define pinSensor1 A4 
+#define pinSensor1 A4
 #define pinSensor2 A3
 #define pinSensor3 A2
 #define pinSensor4 A1
@@ -14,164 +14,188 @@
 #define IN4 8
 
 //cria vetores para leitura e para minimo e maximo das leituras
-float leituras[5];
-float maximo [5] = {0,0,0,0,0};
-float minimo [5] = {1023, 1023, 1023, 1023, 1023};
+int leituras[5];
+const int minimo[5] = { 9, 9, 9, 9, 9 };
+const int maximo[5] = { 1023, 1023, 1023, 1023, 1023 };
 float normalizado[5];
 
 //cria constantes com valores iniciais para tentativa e erro
-float Kp = 100;
-float Kd = 80;
-float Ki = 0;
+const float Kp = 20.0;
+const float Kd = 0;
 
 //define variáveis para cálculo
-float somaNormalizados =0;
-float mediaPonderada=0;
-float proporcional;
+float somaNormalizados = 0;
+float mediaPonderada = 0;
 float erroAnterior = 0;
 float derivada;
-float correcao;
-float faixa;
-float somaLeituras;
+const float linhaLimiar = 0.2;
 
 //define variáveis de velocidade
-float velocidadeEsquerda;
-float velocidadeDireita;
-int velocidadeBase=80;
+const int PWM_Minimo = 62;
+const int PWM_Maximo = 255;
+int velocidadeEsquerda;
+int velocidadeDireita;
+const int velocidadeBase = 80;
 
 //variáveis para tempo (recuperação)
 unsigned long tempoInicioRecuperacao = 0;
 bool recuperando = false;
-const unsigned long TEMPO_MAX_RECUPERACAO = 1000;
+const unsigned long TEMPO_MAX_RECUPERACAO = 400;
 
-void setup()
-{
-    // definir todos os sensores como input para leitura
-    pinMode(pinSensor1, INPUT);
-    pinMode(pinSensor2, INPUT);
-    pinMode(pinSensor3, INPUT);
-    pinMode(pinSensor4, INPUT);
-    pinMode(pinSensor5, INPUT);
-    
-    pinMode(ENA, OUTPUT);
-    pinMode(IN1, OUTPUT);
-    pinMode(IN2, OUTPUT);
+void setup() {
+  // definir todos os sensores como input para leitura
+  pinMode(pinSensor1, INPUT);
+  pinMode(pinSensor2, INPUT);
+  pinMode(pinSensor3, INPUT);
+  pinMode(pinSensor4, INPUT);
+  pinMode(pinSensor5, INPUT);
 
-    pinMode(ENB, OUTPUT);
-    pinMode(IN3, OUTPUT);
-    pinMode(IN4, OUTPUT);
-    
-    Serial.begin(9600);
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+
+  pinMode(ENB, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  Serial.begin(9600);
 }
 
-void andar(float velocidadeDireita, float velocidadeEsquerda) 
-{    
-       digitalWrite(IN1, HIGH);
-       digitalWrite(IN2, LOW);
-       digitalWrite(IN3, HIGH);
-       digitalWrite(IN4, LOW);
-       analogWrite(ENA, velocidadeDireita);
-       analogWrite (ENB, velocidadeEsquerda);
+void andar(float velocidadeDireita, float velocidadeEsquerda) {
+  if (velocidadeDireita <= 0) velocidadeDireita = 0;
+  if (velocidadeEsquerda <= 0) velocidadeEsquerda = 0;
+
+  if (velocidadeDireita > 0 && velocidadeDireita < PWM_Minimo)
+    velocidadeDireita = PWM_Minimo;
+
+  if (velocidadeDireita > PWM_Maximo)
+    velocidadeDireita = PWM_Maximo;
+
+  if (velocidadeEsquerda > 0 && velocidadeEsquerda < PWM_Minimo)
+    velocidadeEsquerda = PWM_Minimo;
+
+  if (velocidadeEsquerda > PWM_Maximo)
+    velocidadeEsquerda = PWM_Maximo;
+
+
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, velocidadeDireita);
+  analogWrite(ENB, velocidadeEsquerda);
 }
-void parar(){
+
+void parar() {
   //TODO: implementar um delay que aguarda e verifica novamente se ainda todos os sensores estão muito baixos, se sim, para, se não, dá return
-       digitalWrite(IN1, LOW);
-       digitalWrite(IN2, LOW);
-       digitalWrite(IN3, LOW);
-       digitalWrite(IN4, LOW);
-       analogWrite(ENA, LOW);
-       analogWrite (ENB, LOW);
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, LOW);
+  analogWrite(ENB, LOW);
 }
 
-void recuperar(){
-    if(!recuperando){
-        tempoInicioRecuperacao = millis();
-        recuperando = true;
-    }
+void recuperar() {
+  if (!recuperando) {
+    tempoInicioRecuperacao = millis();
+    recuperando = true;
+  }
 
-    if(millis() - tempoInicioRecuperacao > TEMPO_MAX_RECUPERACAO){
-        parar();
-        return;
+  while (millis() - tempoInicioRecuperacao < TEMPO_MAX_RECUPERACAO) {
+    if (erroAnterior > 0) {
+      andar(160, 0);
+    } else {
+      andar(0, 160);
     }
-
-    if(erroAnterior > 0){
-        andar(255, 0); 
-    }else{
-        andar(0, 255);
-    }
+  }
+  return;
 }
-void calibrar(float leituras [5]){
-    for (int i=0; i<5; i++){
-        if(leituras[i]<minimo[i]){
-          minimo[i]=leituras[i];
-        }
-        if(leituras[i]>maximo[i]){
-          maximo[i]=leituras[i];
-        }
+void calibrar(float leituras[5]) {
+  for (int i = 0; i < 5; i++) {
+    if (leituras[i] < minimo[i]) {
+      minimo[i] = leituras[i];
     }
-}
-
-void leitura(){
-    leituras[0] = analogRead(pinSensor1); //peso -2
-    leituras[1] = analogRead(pinSensor2); //peso -1
-    leituras[2] = analogRead(pinSensor3); //peso 0
-    leituras[3] = analogRead(pinSensor4); //peso 1
-    leituras[4] = analogRead(pinSensor5) ; //peso 2
-}
-
-void calcularSomaNormalizados(){
-  somaNormalizados = 0;
-  for(int i=0;i<5;i++){
-    somaNormalizados+=normalizado[i];
+    if (leituras[i] > maximo[i]) {
+      maximo[i] = leituras[i];
+    }
   }
 }
-  
-void normalizar(){
-  for(int i = 0; i < 5; i++){
-    faixa = maximo[i] - minimo[i];
-    if(faixa <= 0){
-      normalizado[i] = 0; // evita divisão por zero
+
+void leitura() {
+  leituras[0] = analogRead(pinSensor1);  //peso -2
+  leituras[1] = analogRead(pinSensor2);  //peso -1
+  leituras[2] = analogRead(pinSensor3);  //peso 0
+  leituras[3] = analogRead(pinSensor4);  //peso 1
+  leituras[4] = analogRead(pinSensor5);  //peso 2
+}
+
+void calcularSomaNormalizados() {
+  somaNormalizados = 0;
+  for (int i = 0; i < 5; i++) {
+    somaNormalizados += normalizado[i];
+  }
+}
+
+void normalizar() {
+  for (int i = 0; i < 5; i++) {
+    float faixa = maximo[i] - minimo[i];
+
+    if (faixa <= 0) {
+      normalizado[i] = 0;
     } else {
       normalizado[i] = (leituras[i] - minimo[i]) / faixa;
+
+      if (normalizado[i] < 0) {
+        normalizado[i] = 0;
+      } else if (normalizado[i] > 1) {
+        normalizado[i] = 1;
+      }
     }
   }
 }
 
-void re(){
+void re() {
   //TO DO implementar dar ré se ele tava andando reto, e se perdeu
-       digitalWrite(IN1, LOW);
-       digitalWrite(IN2, HIGH);
-       digitalWrite(IN3, LOW);
-       digitalWrite(IN4, HIGH);
-       analogWrite(ENA, 120);
-       analogWrite (ENB, 120);
+
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENA, 120);
+  analogWrite(ENB, 120);
 }
 
 
-void loop()
-{
-   leitura();
-   calibrar(leituras);
-   normalizar();
-   calcularSomaNormalizados();
-   somaLeituras = leituras[0]+leituras[1]+leituras[2]+leituras[3]+leituras[4];
-    if(somaLeituras >= 300){
-      recuperando = false;
-      if(somaNormalizados > 0){
-        mediaPonderada = (normalizado[0] * -2 + normalizado[1] * -1 + normalizado[3]* 1 + normalizado[4] * 2)/somaNormalizados;
-        proporcional = Kp * mediaPonderada;
-    
-        derivada = Kd * (mediaPonderada - erroAnterior);
-        
-        correcao = proporcional + derivada;
-        
-        velocidadeDireita = constrain(velocidadeBase - correcao, 0, 255);
-        velocidadeEsquerda = constrain(velocidadeBase + correcao, 0, 255);
-        andar(velocidadeDireita,velocidadeEsquerda);
-        erroAnterior = mediaPonderada;
-      }
- 
-   }else{
-       recuperar();
-    }
+void loop() {
+
+  leitura();
+  normalizar();
+  calcularSomaNormalizados();
+  recuperando = false;
+
+  if (somaNormalizados >= limiarLinha) {
+
+    mediaPonderada =
+      (normalizado[0] * -2 + normalizado[1] * -1 + normalizado[3] * 1 + normalizado[4] * 2) / somaNormalizados;
+
+    float erroAtual = mediaPonderada;
+
+    float parcelaProporcional = Kp * erroAtual;
+
+    float variacaoErro = erroAtual - erroAnterior;
+    float parcelaDerivativa = Kd * variacaoErro;
+
+    float correcao = parcelaProporcional + parcelaDerivativa;
+
+    velocidadeDireita = velocidadeBase - correcao;
+    velocidadeEsquerda = velocidadeBase + correcao;
+
+    andar(velocidadeDireita, velocidadeEsquerda);
+
+    erroAnterior = erroAtual;
+  } else {
+
+    recuperar();
+  }
 }
