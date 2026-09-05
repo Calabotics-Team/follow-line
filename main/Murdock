@@ -6,11 +6,11 @@
 #define pinSensor5 A0
 
 /* mantive a configuração dos motores, igual nas versões anteriores*/
-#define ENA 3
-#define IN1 5
-#define IN2 6
-#define ENB 9
-#define IN3 7
+#define ENA 3   // PWM - velocidade do Motor A (roda direita)
+#define IN1 10   // Sentido do Motor A
+#define IN2 11   // Sentido do Motor A
+#define ENB 9   // PWM - velocidade do Motor B (roda esquerda)
+#define IN3 7   // Sentido do Motor B
 #define IN4 8
 
 //cria vetores para leitura e para minimo e maximo das leituras
@@ -105,9 +105,9 @@ void recuperar() {
 
   while (millis() - tempoInicioRecuperacao < TEMPO_MAX_RECUPERACAO) {
     if (erroAnterior > 0) {
-      andar(160, 0);
+      reDireita(120);
     } else {
-      andar(0, 160);
+      reEsquerda(120);
     }
   }
   return;
@@ -145,15 +145,24 @@ void normalizar() {
   }
 }
 
-void re() {
-  //TO DO implementar dar ré se ele tava andando reto, e se perdeu
+void reEsquerda(int velocidadeRe) {
 
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, HIGH);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
-  analogWrite(ENA, 120);
-  analogWrite(ENB, 120);
+  analogWrite(ENA, velocidadeRe);
+  analogWrite(ENB, 0);
+}
+
+void reDireita(int velocidadeRe) {
+
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENA, 0);
+  analogWrite(ENB, velocidadeRe);
 }
 
 
@@ -183,8 +192,8 @@ void loop() {
 
     float correcao = parcelaProporcional + parcelaDerivativa;
 
-    velocidadeDireita = velocidadeBase - correcao;
-    velocidadeEsquerda = velocidadeBase + correcao;
+    velocidadeDireita = velocidadeBase +  correcao;
+    velocidadeEsquerda = velocidadeBase - correcao;
 
     andar(velocidadeDireita, velocidadeEsquerda);
 
