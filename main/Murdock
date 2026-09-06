@@ -20,7 +20,7 @@
   float normalizado[5];
   
   //cria constantes com valores iniciais para tentativa e erro
-  const float Kp = 95.0;
+  const float Kp = 100.0;
   const float Kd = 45.0;
   
   //define variáveis para cálculo
@@ -34,14 +34,14 @@
   const int PWM_Maximo = 255;
   int velocidadeEsquerda;
   int velocidadeDireita;
-  const int velocidadeBase = 110;
+  const int velocidadeBase = 90;
   
   //variáveis para tempo (recuperação)
   unsigned long ultimaExec = 0;
   const unsigned long intervalo = 5;
   unsigned long tempoInicioRecuperacao = 0;
   bool recuperando = false;
-  const unsigned long TEMPO_MAX_RECUPERACAO = 380;
+  const unsigned long TEMPO_MAX_RECUPERACAO = 300;
   
   void setup() {
     // definir todos os sensores como input para leitura
