@@ -42,7 +42,7 @@ unsigned long ultimaExec = 0;
 const unsigned long intervalo = 5;
 unsigned long tempoInicioRecuperacao = 0;
 bool recuperando = false;
-const unsigned long TEMPO_MAX_RECUPERACAO = 395;
+const unsigned long TEMPO_MAX_RECUPERACAO = 400;
 
 void setup() {
   // definir todos os sensores como input para leitura
