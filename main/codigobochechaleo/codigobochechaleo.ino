@@ -21,8 +21,8 @@ const int maximo[5] = { 1023, 1023, 1023, 1023, 1023 };
 float normalizado[5];
 
 //cria constantes com valores iniciais para tentativa e erro
-const float Kp = 91.5;
-const float Kd = 5.5;
+const float Kp = 92.5;
+const float Kd = 7;
 
 //define variáveis para cálculo
 float somaNormalizados = 0;
@@ -154,7 +154,7 @@ void reEsquerda(int velocidadeRe) {
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
   analogWrite(ENA, velocidadeRe);
-  analogWrite(ENB, 0);
+  analogWrite(ENB, 10);
 }
 
 void reDireita(int velocidadeRe) {
@@ -163,7 +163,7 @@ void reDireita(int velocidadeRe) {
   digitalWrite(IN2, HIGH);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
-  analogWrite(ENA, 0);
+  analogWrite(ENA, 10);
   analogWrite(ENB, velocidadeRe);
 }
 
