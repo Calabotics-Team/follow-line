@@ -20,8 +20,8 @@ const int maximo[5] = { 1023, 1023, 1023, 1023, 1023 };
 float normalizado[5];
 
 //cria constantes com valores iniciais para tentativa e erro
-const float Kp = 20.0;
-const float Kd = 0;
+const float Kp = 80.0;
+const float Kd = 4;
 
 //define variáveis para cálculo
 float somaNormalizados = 0;
@@ -30,15 +30,15 @@ float erroAnterior = 0;
 const float linhaLimiar = 0.2;
 
 //define variáveis de velocidade
-const int PWM_Minimo = 62;
+const int PWM_Minimo = 70;
 const int PWM_Maximo = 255;
 int velocidadeEsquerda;
 int velocidadeDireita;
-const int velocidadeBase = 80;
+const int velocidadeBase = 95;
 
 //variáveis para tempo (recuperação)
 unsigned long ultimaExec = 0;
-const unsigned long intervalo = 6;
+const unsigned long intervalo = 5;
 unsigned long tempoInicioRecuperacao = 0;
 bool recuperando = false;
 const unsigned long TEMPO_MAX_RECUPERACAO = 400;
@@ -79,8 +79,8 @@ void andar(int velocidadeDireita, int velocidadeEsquerda) {
     velocidadeEsquerda = PWM_Maximo;
 
 
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
   digitalWrite(IN3, HIGH);
   digitalWrite(IN4, LOW);
   analogWrite(ENA, velocidadeDireita);
@@ -105,9 +105,9 @@ void recuperar() {
 
   while (millis() - tempoInicioRecuperacao < TEMPO_MAX_RECUPERACAO) {
     if (erroAnterior > 0) {
-      reDireita(100);
+      reDireita(90);
     } else {
-      reEsquerda(100);
+      reEsquerda(90);
     }
   }
   return;
@@ -147,8 +147,8 @@ void normalizar() {
 
 void reEsquerda(int velocidadeRe) {
 
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, HIGH);
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
   digitalWrite(IN3, LOW);
   digitalWrite(IN4, HIGH);
   analogWrite(ENA, velocidadeBase);
@@ -167,6 +167,7 @@ void reDireita(int velocidadeRe) {
 
 
 void loop() {
+  
   unsigned long tempoAtual = millis();
 
   if (tempoAtual - ultimaExec < intervalo) {
@@ -202,4 +203,5 @@ void loop() {
 
     recuperar();
   }
+  
 }
